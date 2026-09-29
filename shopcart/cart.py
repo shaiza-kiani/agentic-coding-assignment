@@ -16,6 +16,10 @@ class Cart:
     def remove_item(self, sku: str):
         del self.items[sku]
 
+    def clear(self) -> None:
+        self.items.clear()
+        self.discount_percent = 0
+
     def subtotal(self) -> float:
         return round(sum(i["price"] * i["qty"] for i in self.items.values()), 2)
 
