@@ -7,11 +7,15 @@ class Cart:
         self.items = {}  # sku -> {"price": float, "qty": int}
         self.discount_percent = 0
 
-    def add_item(self, sku: str, price: float, qty: int = 1):
+    def add_item(self, sku: str, price: float, qty: int = 1) -> None:
         if qty <= 0:
             raise ValueError("qty must be positive")
-        # BUG (planted): adding the same SKU again replaces the quantity
-        self.items[sku] = {"price": price, "qty": qty}
+        existing = self.items.get(sku)
+        if existing is None:
+            self.items[sku] = {"price": price, "qty": qty}
+        else:
+            existing["price"] = price
+            existing["qty"] += qty
 
     def remove_item(self, sku: str):
         del self.items[sku]
