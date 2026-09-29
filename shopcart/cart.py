@@ -10,8 +10,9 @@ class Cart:
     def add_item(self, sku: str, price: float, qty: int = 1):
         if qty <= 0:
             raise ValueError("qty must be positive")
-        # BUG (planted): adding the same SKU again replaces the quantity
-        self.items[sku] = {"price": price, "qty": qty}
+        item = self.items.setdefault(sku, {"price": price, "qty": 0})
+        item["qty"] += qty
+        item["price"] = price
 
     def remove_item(self, sku: str):
         del self.items[sku]
