@@ -1,0 +1,69 @@
+diff --git a/shopcart/cart.py b/shopcart/cart.py
+index 66fe27c..8f89a4c 100644
+--- a/shopcart/cart.py
++++ b/shopcart/cart.py
+@@ -10,8 +10,10 @@ class Cart:
+     def add_item(self, sku: str, price: float, qty: int = 1):
+         if qty <= 0:
+             raise ValueError("qty must be positive")
+-        # BUG (planted): adding the same SKU again replaces the quantity
+-        self.items[sku] = {"price": price, "qty": qty}
++        if sku in self.items:
++            self.items[sku]["qty"] += qty
++        else:
++            self.items[sku] = {"price": price, "qty": qty}
+ 
+     def remove_item(self, sku: str):
+         del self.items[sku]
+@@ -22,5 +24,9 @@ class Cart:
+     def apply_coupon(self, code: str):
+         self.discount_percent = coupon_percent(code)
+ 
++    def clear(self) -> None:
++        """Remove all items from the cart."""
++        self.items.clear()
++
+     def total(self) -> float:
+         return apply_percent_discount(self.subtotal(), self.discount_percent)
+diff --git a/shopcart/pricing.py b/shopcart/pricing.py
+index 7bb37f5..62b8851 100644
+--- a/shopcart/pricing.py
++++ b/shopcart/pricing.py
+@@ -1,5 +1,8 @@
+ """Pricing helpers for the shopping cart."""
+ 
++class InvalidCouponError(KeyError):
++    pass
++
+ COUPONS = {"SAVE10": 10, "SAVE20": 20}  # percent off
+ 
+ 
+@@ -11,5 +14,8 @@ def apply_percent_discount(amount: float, percent: float) -> float:
+ 
+ 
+ def coupon_percent(code: str) -> float:
+-    """Look up a coupon code. Unknown codes raise KeyError."""
+-    return COUPONS[code.upper()]
++    """Look up a coupon code. Unknown codes raise InvalidCouponError."""
++    try:
++        return COUPONS[code.upper()]
++    except KeyError:
++        raise InvalidCouponError(f"Unknown coupon code: {code}")
+diff --git a/tests/test_cart.py b/tests/test_cart.py
+index 5cb78f9..e92667c 100644
+--- a/tests/test_cart.py
++++ b/tests/test_cart.py
+@@ -26,3 +26,13 @@ def test_invalid_qty_rejected():
+     c = Cart()
+     with pytest.raises(ValueError):
+         c.add_item("pen", 1.50, 0)
++
++
++def test_clear_removes_all_items():
++    c = Cart()
++    c.add_item("pen", 1.50, 2)
++    c.add_item("notebook", 3.25, 1)
++    assert c.subtotal() == 6.25
++    c.clear()
++    assert c.subtotal() == 0.00
++    assert len(c.items) == 0
