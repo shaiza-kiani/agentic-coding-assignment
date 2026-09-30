@@ -1,4 +1,4 @@
-# Agentic Coding Platforms: Submission (Sajil Tariq)
+# Agentic Coding Platforms: Submission (shaiza kiani)
 
 ## Purpose
 I tested free AI coding agents on one small shared project (shopcart, a
