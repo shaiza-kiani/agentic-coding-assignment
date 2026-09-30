@@ -24,3 +24,8 @@ class Cart:
 
     def total(self) -> float:
         return apply_percent_discount(self.subtotal(), self.discount_percent)
+
+    def clear(self) -> None:
+        """Empty the cart items and reset the applied coupon."""
+        self.items = {}
+        self.discount_percent = 0
